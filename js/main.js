@@ -6,6 +6,19 @@ document.addEventListener("DOMContentLoaded", () => {
     let allProducts = [];
     let cart = [];
     let currentProductId = null;
+
+    // Load products from JSON once the DOM is ready
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            allProducts = data;
+            console.log("Loaded products:", allProducts);
+
+        })
+        .catch(err => {
+            console.error("Error loading products:", err);
+        });
+
     
 
     /* ---------------------- SINGLE PRODUCT VIEW ---------------------- */
@@ -69,6 +82,8 @@ function showProduct(productId) {
         if (product.category === "Outerwear") return "images/outerwear.jpg";
         return "images/default.jpg";
       }
+
+
 
     productImage.innerHTML = ""; // clear previous image
 
@@ -165,6 +180,7 @@ function addToCart(productId, qty) {
     }
 
     alert("Added to cart!");
+    renderCartView();   
 }
 
 
@@ -189,6 +205,249 @@ function showView(viewId) {
     });
 };
 
-    /* ---------------------- SINGLE PRODUCT VIEW ---------------------- */
+    /* ---------------------- SINGLE PRODUCT VIEW END ---------------------- */
+
+
+    /* ---------------------- SHOPPING CART VIEW  ---------------------- */
+
+    const cartItems = document.querySelector("#cartItems");
+    const shippingType = document.querySelector("#shippingType");
+    const shippingCountry = document.querySelector("#shippingCountry");
+    const sumMerch = document.querySelector("#sumMerch");
+    const sumTax = document.querySelector("#sumTax");
+    const sumShip = document.querySelector("#sumShip");
+    const sumTotal = document.querySelector("#sumTotal");
+    const checkoutBtn = document.querySelector("#checkoutBtn");
+
+
+    /* 
+    renderCartView()
+    Builds the shopping cart UI inside #cartItems.
+    For each item in the cart:
+        - Find the matching product in allProducts
+        - Display name, price, quantity box, subtotal, remove button
+    If cart is empty, show "Your cart is empty"
+    */
+    function renderCartView() {
+        cartItems.innerHTML = "";
+
+        //If nothing in cart, show message and zero totals 
+        if (cart.length === 0) {
+            cartItems.textContent = "Your cart is empty";
+            updateCartSummary();
+            return;
+        }
+
+        cart.forEach(item => {
+            // Find matching product so we can show name & price
+            const product = allProducts.find(p => p.id === item.id);
+            if (!product) return;
+
+            const price = product.price;
+            const subTotal = price * item.quantity;
+
+            // Create the row container
+            const row = document.createElement("div");
+            row.classList.add("cart-item");
+            row.dataset.productId = item.id;
+            
+            //Title
+            const title = document.createElement("h3");
+            title.textContent = product.name || product.title;
+            row.appendChild(title);
+
+            //Price info
+            const info = document.createElement("p");
+            info.textContent = `Price: $${price.toFixed(2)}`;
+            row.appendChild(info);
+
+            //Quantity control
+            const qtyLabel = document.createElement("label");
+            qtyLabel.textContent = "Qty: ";
+
+            const qtyInputCart = document.createElement("input");
+            qtyInputCart.type = "number";
+            qtyInputCart.min = "1";
+            qtyInputCart.value = item.quantity;
+            qtyInputCart.classList.add("cart-qty");
+            qtyLabel.appendChild(qtyInputCart);
+            row.appendChild(qtyLabel);
+
+            //Subtotal
+            const sub = document.createElement("p");
+            sub.textContent = `Subtotal: $${subTotal.toFixed(2)}`;
+            row.appendChild(sub);
+
+            //Remove button 
+            const removeBtn = document.createElement("button");
+            removeBtn.textContent = "Remove";
+            removeBtn.classList.add("cart-remove");
+            row.appendChild(removeBtn);
+            
+            cartItems.appendChild(row);
+        });
+
+        updateCartSummary();
+    }
+    /*
+    updateCartSummary()
+    -------------------
+    Calculates:
+        - merchandise total
+        - GST
+        - shipping cost
+        - final total
+    Updates the #summaryBox UI.
+    */
+    function updateCartSummary() {
+        let merchTotal = 0;
+
+        cart.forEach(item => {
+            const product = allProducts.find(p => p.id === item.id);
+            if(!product) return;
+            merchTotal += product.price * item.quantity;
+        });
+
+        const tax = merchTotal * 0.05;
+        const shipping = calculateShipping(merchTotal, shippingType.value, shippingCountry.value);
+        const total = merchTotal + tax + shipping;
+
+        sumMerch.textContent = `$${merchTotal.toFixed(2)}`;
+        sumTax.textContent = `$${tax.toFixed(2)}`;
+        sumShip.textContent = `$${shipping.toFixed(2)}`;
+        sumTotal.textContent = `$${total.toFixed(2)}`;
+}
+
+    /*
+    calculateShipping(merchTotal, type, country)
+    -------------------------------------------
+    Simple shipping rules:
+        - Free shipping over $500
+        - Base cost depends on shipping type and country
+    */
+    function calculateShipping(merchTotal, type, country) {
+        if(merchTotal == 0) return 0;
+
+        if (merchTotal > 500) return 0;
+
+        let base = 0;
+
+        //Shipping cost based on type and country
+        if (type === "standard") {
+            if(country === "canada") base = 10;
+            else if (country === "usa") base = 15;
+            else if (country === "international") base = 20;
+        }
+        else if(type === "express") {
+            if(country === "canada") base = 25;
+            else if (country === "usa") base = 25;
+            else if (country === "international") base = 30;
+        }
+        else if (type === "priority") {
+            if(country === "canada") base = 35;
+            else if (country === "usa") base = 50;
+            else if (country === "international") base = 50;
+        }
+
+        return base;
+    }
+    /*
+    findCartRow(element)
+    --------------------
+    Same idea as your findProductCard:
+    Walk upward in the DOM until we find the parent <div class="cart-item">
+    */
+    function findCartRow(e) {
+        while (e != null) {
+            if (e.classList && e.classList.contains("cart-item")) {
+                return e;
+            }
+            e = e.parentNode;
+        }
+        return null;
+    };
+
+    /*
+    Event Delegation:
+    -----------------
+    Handle clicking the remove button inside any cart row.
+    */
+    cartItems.addEventListener("click", (e) => {
+        if (!e.target.classList.contains("cart-remove")) return;
+
+        const row = findCartRow(e.target);
+        if(!row) return;
+
+        const id = row.dataset.productId;
+        removeFromCart(id);
+    });
+
+    /*
+    Event Delegation:
+    -----------------
+    Handle quantity changes inside any cart row.
+    */
+    cartItems.addEventListener("change", (e) => {
+        if (!e.target.classList.contains("cart-qty")) return;
+
+        const row = findCartRow(e.target);
+        if(!row) return;
+
+        const id = row.dataset.productId;
+        const newQty = parseInt(e.target.value);
+        updateCartQuantity(id, newQty);
+    })
+
+    /*
+    removeFromCart(productId)
+    -------------------------
+    Deletes the item from the cart array.
+    */
+    function removeFromCart(productId) {
+        cart = cart.filter(item => item.id !== productId);
+        renderCartView();
+    }
+
+    /*
+    updateCartQuantity(productId, newQty)
+    ------------------------------------
+    Updates quantity of the item.
+    */
+    function updateCartQuantity(productId, newQty) {
+        if (!newQty || newQty < 1 ) newQty = 1;
+
+        const item = cart.find(i => i.id === productId);
+        if(!item) return;
+
+        item.quantity = newQty;
+        renderCartView();
+    }
+
+    /*
+    Recalculate shipping cost whenever user changes dropdowns
+    */
+    shippingType.addEventListener("change", updateCartSummary);
+    shippingCountry.addEventListener("change", updateCartSummary);
+
+    /*
+    checkoutBtn functionality:
+    - show alert
+    - clear cart
+    - refresh cart view
+    */
+    checkoutBtn.addEventListener("click", () => {
+        if (cart.length === 0) {
+            alert("Your cart is empty.");
+            return;
+        }
+
+        alert("Checkout complete!");
+
+        // Clear cart and re-render
+        cart = [];
+        renderCartView();
+        /* ---------------------- SHOPPING CART VIEW END ---------------------- */
+
+});
 
 });
