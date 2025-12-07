@@ -9,14 +9,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Load products from JSON once the DOM is ready
     fetch(url)
-        .then(response => response.json())
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else 
+            throw new Error("Fetch failed");
+        })
         .then(data => {
             allProducts = data;
-            console.log("Loaded products:", allProducts);
+
+            applyBrowseFiltersAndSort();    
+            showView("browseView");
 
         })
         .catch(err => {
-            console.error("Error loading products:", err);
+            console.error("Error loading products:", err); 
         });
 
     
@@ -33,6 +40,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const addToCartBtn = document.querySelector("#addToCartBtn");
     const relatedProducts = document.querySelector("#relatedProducts");
     const results = document.querySelector("#results");
+    const activeFilters = document.querySelector("#active-filters");
+    const clearAllFiltersBtn = document.querySelector("#clearAllFilters");
+    const sortSelect = document.querySelector("#sortSelect");
+    const sizeOptions = document.querySelector("#sizeOptions");
+    const colorOptions = document.querySelector("#colorOptions");
+    let selectedSize = null;
+    let selectedColor = null;
 
    /* 
   showProduct(productId)
@@ -63,33 +77,29 @@ function showProduct(productId) {
     // Update breadcrumbs (top path: Home > Gender > Category > Title)
     // -------------------------
     breadcrumbs.textContent =
-        `Home > ${product.gender} > ${product.category} > ${product.title}`;
+        `Home > ${product.gender} > ${product.category} > ${product.name}`;
 
     // -------------------------
     // Update main product info
     // -------------------------
-    productTitle.textContent = product.title;
+    productTitle.textContent = product.name;
     productPrice.textContent = `$${product.price.toFixed(2)}`;
     productDescription.textContent = product.description;
     productMaterial.textContent = `Material: ${product.material}`;
 
-    function getProductImage(product) {
-        if (product.category === "Tops") return "images/tops.jpg";
-        if (product.category === "Bottoms") return "images/bottoms.jpg";
-        if (product.category === "Dresses") return "images/dress.jpg";
-        if (product.category === "Swimwear") return "images/swimwear.jpg";
-        if (product.category === "Accessories") return "images/accessories.jpg";
-        if (product.category === "Outerwear") return "images/outerwear.jpg";
-        return "images/default.jpg";
-      }
+    // Set default selected size and color for this product
+    selectedSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
+    selectedColor = product.color && product.color.length > 0 ? product.color[0].name : null;
 
-
+    // Render size and color options for this product
+    renderSizeOptions(product);
+    renderColorOptions(product);
 
     productImage.innerHTML = ""; // clear previous image
 
     const img = document.createElement("img");
     img.src = getProductImage(product); // <--- use the helper
-    img.alt = product.name; 
+    img.alt = product.name;
     img.style.width = "300px";
     img.style.height = "auto";
     img.style.borderRadius = "8px";
@@ -106,28 +116,179 @@ function showProduct(productId) {
     showView("singleProductView");
 }
 
+function getProductImage(product) {
+    if (product.category === "Tops") return "images/tops.jpg";
+    if (product.category === "Bottoms") return "images/bottoms.jpg";
+    if (product.category === "Dresses") return "images/dress.jpg";
+    if (product.category === "Swimwear") return "images/swimwear.jpg";
+    if (product.category === "Accessories") return "images/accessories.jpg";
+    if (product.category === "Outerwear") return "images/outerwear.jpg";
+    if (product.category === "Loungewear") return "images/loungewear.jpg";
+    if (product.category === "Intimates") return "images/intimates.jpg";
+    if (product.category === "Shoes") return "images/shoes.jpg";
+    if (product.category === "Sweaters") return "images/sweaters.jpg";
+    if (product.category === "Jumpsuits") return "images/jumpsuits.jpg";
+    return "images/default.jpg";
+  }
 
+    /*
+    renderSizeOptions(product)
+    Builds clickable size buttons (XS, S, M, L, etc.) for the
+    current product. Highlights the currently selected size.
+    */
+  function renderSizeOptions(product) {
+    sizeOptions.innerHTML = "";
+
+    //If no sizes listed, show a message that says one size only
+    if (!product.sizes || product.sizes.length === 0) {
+        sizeOptions.textContent = "One size only";
+        return;
+    }
+
+    product.sizes.forEach(size => {
+        const btn = document.createElement("button");
+        btn.textContent = size;
+        btn.classList.add("size-option");
+
+        if(size === selectedSize) {
+            btn.classList.add("active");
+        }
+        sizeOptions.appendChild(btn);
+    });
+  }
+
+    /*
+    Size options click handler
+    --------------------------
+    When user clicks a size button, update selectedSize and
+    highlight that button.
+    */
+    sizeOptions.addEventListener("click", (e) => {
+        if (!e.target.classList.contains("size-option")) return;
+
+        selectedSize = e.target.textContent;
+
+        // Toggle active class on all size buttons
+        const buttons = sizeOptions.querySelectorAll(".size-option");
+        buttons.forEach(btn => {
+            btn.classList.toggle("active", btn === e.target);
+        });
+    });
+
+
+    /*
+    renderColorOptions(product)
+    Builds color swatches for the current product using the
+    product.color array (name + hex). Highlights the selected color.
+    */
+    function renderColorOptions(product) {
+        colorOptions.innerHTML = "";
+    
+        if (!product.color || product.color.length === 0) {
+            colorOptions.textContent = "No color options";
+            return;
+        }
+    
+        product.color.forEach(c => {
+            // wrapper so we can stack swatch + text together
+            const wrapper = document.createElement("div");
+            wrapper.classList.add("color-wrapper");
+    
+            // swatch circle
+            const swatch = document.createElement("button");
+            swatch.classList.add("color-swatch");
+            swatch.style.backgroundColor = c.hex;
+            swatch.dataset.colorName = c.name;
+    
+            if (c.name === selectedColor) {
+                swatch.classList.add("active");
+            }
+    
+            // label
+            const label = document.createElement("span");
+            label.textContent = c.name;
+            label.classList.add("color-label");
+    
+            wrapper.appendChild(swatch);
+            wrapper.appendChild(label);
+    
+            colorOptions.appendChild(wrapper);
+        });
+    }
+
+    /*
+    Color options click handler
+    ---------------------------
+    When user clicks a color swatch, update selectedColor and
+    highlight that swatch.
+    */
+    colorOptions.addEventListener("click", (e) => {
+        if (!e.target.classList.contains("color-swatch")) return;
+
+        selectedColor = e.target.dataset.colorName;
+
+        const swatches = colorOptions.querySelectorAll(".color-swatch");
+        swatches.forEach(sw => {
+            sw.classList.toggle("active", sw === e.target);
+        });
+    });
+    
 /*
   renderRelatedProducts(product)
-  ------------------------------
-  Shows up to 4 other items from the same category as the current product.
-  These appear as simple clickable cards below the main product info.
+  Builds up to 4 related product cards (same category, different id)
+  underneath the main Single Product view.
+
+  Each related card:
+    - uses class "product-card related-card"
+    - has data-product-id set
+    - shows image, name, price
+    - includes a "+ Add" button
 */
 function renderRelatedProducts(product) {
-    // Clear previous related products
+    // Clear any previous related items
     relatedProducts.innerHTML = "";
 
-    // Get related items: same category, exclude the current product
+    // Get other products in the same category (exclude current one)
     const related = allProducts
         .filter(p => p.category === product.category && p.id !== product.id)
-        .slice(0, 4); // only show first 4 items
+        .slice(0, 4); // limit to 4 items
 
-    // Create a small card for each related product
+    // If no related items, just leave blank (or show message if you want)
+    if (related.length === 0) {
+        return;
+    }
+
     related.forEach(p => {
-        const card = document.createElement("div");
-        card.classList.add("related-card");
-        card.dataset.productId = p.id; // allow clicking to open single product
-        card.textContent = `${p.title} - $${p.price.toFixed(2)}`;
+        // Outer card
+        const card = document.createElement("article");
+        card.classList.add("product-card", "related-card"); // reuse product-card styling
+        card.dataset.productId = p.id;
+
+        // Image
+        const img = document.createElement("img");
+        img.src = getProductImage(p);
+        img.alt = p.name || p.title;
+        img.classList.add("product-image"); // same class as browse cards
+        card.appendChild(img);
+
+        // Title
+        const title = document.createElement("h4");
+        title.textContent = p.name || p.title;
+        title.classList.add("product-title");
+        card.appendChild(title);
+
+        // Price
+        const price = document.createElement("p");
+        price.textContent = `$${p.price.toFixed(2)}`;
+        price.classList.add("product-price");
+        card.appendChild(price);
+
+        // "+ Add" button
+        const addBtn = document.createElement("button");
+        addBtn.textContent = "+ Add";
+        addBtn.classList.add("card-add");   
+        card.appendChild(addBtn);
+
         relatedProducts.appendChild(card);
     });
 }
@@ -140,6 +301,16 @@ function renderRelatedProducts(product) {
   - Reads the product ID from the card.
 */
 results.addEventListener("click", (e) => {
+    if (e.target.classList.contains("card-add")) {
+        // 1) If user clicked the "+ Add" button on a card, add to cart only
+        const card = findProductCard(e.target);
+        if (!card) return;
+        const id = card.dataset.productId;
+        addToCart(id, 1);
+        return;
+    }
+
+    // 2) Otherwise treat click as "open this product"
     const card = findProductCard(e.target);
     if (!card) return;
 
@@ -170,13 +341,15 @@ function findProductCard(element) {
 */
 function addToCart(productId, qty) {
 
+    const idNum = Number(productId);
+
     // Try to find existing item
-    const existing = cart.find(item => item.id == productId);
+    const existing = cart.find(item => item.id === idNum);
 
     if (existing) {
         existing.quantity += qty; // increment existing quantity
     } else {
-        cart.push({ id: productId, quantity: qty }); // add new entry
+        cart.push({ id: idNum, quantity: qty }); // add new entry
     }
 
     alert("Added to cart!");
@@ -253,7 +426,7 @@ function showView(viewId) {
             
             //Title
             const title = document.createElement("h3");
-            title.textContent = product.name || product.title;
+            title.textContent = product.name;
             row.appendChild(title);
 
             //Price info
@@ -291,7 +464,6 @@ function showView(viewId) {
     }
     /*
     updateCartSummary()
-    -------------------
     Calculates:
         - merchandise total
         - GST
@@ -320,7 +492,6 @@ function showView(viewId) {
 
     /*
     calculateShipping(merchTotal, type, country)
-    -------------------------------------------
     Simple shipping rules:
         - Free shipping over $500
         - Base cost depends on shipping type and country
@@ -353,7 +524,6 @@ function showView(viewId) {
     }
     /*
     findCartRow(element)
-    --------------------
     Same idea as your findProductCard:
     Walk upward in the DOM until we find the parent <div class="cart-item">
     */
@@ -369,7 +539,6 @@ function showView(viewId) {
 
     /*
     Event Delegation:
-    -----------------
     Handle clicking the remove button inside any cart row.
     */
     cartItems.addEventListener("click", (e) => {
@@ -384,7 +553,6 @@ function showView(viewId) {
 
     /*
     Event Delegation:
-    -----------------
     Handle quantity changes inside any cart row.
     */
     cartItems.addEventListener("change", (e) => {
@@ -400,23 +568,23 @@ function showView(viewId) {
 
     /*
     removeFromCart(productId)
-    -------------------------
     Deletes the item from the cart array.
     */
     function removeFromCart(productId) {
-        cart = cart.filter(item => item.id !== productId);
+        const idNum = Number(productId);
+        cart = cart.filter(item => item.id !== idNum);
         renderCartView();
     }
 
     /*
     updateCartQuantity(productId, newQty)
-    ------------------------------------
     Updates quantity of the item.
     */
     function updateCartQuantity(productId, newQty) {
         if (!newQty || newQty < 1 ) newQty = 1;
 
-        const item = cart.find(i => i.id === productId);
+        const idNum = Number(productId);
+        const item = cart.find(i => i.id === idNum);
         if(!item) return;
 
         item.quantity = newQty;
@@ -446,8 +614,372 @@ function showView(viewId) {
         // Clear cart and re-render
         cart = [];
         renderCartView();
-        /* ---------------------- SHOPPING CART VIEW END ---------------------- */
+    /* ---------------------- SHOPPING CART VIEW END ---------------------- */
 
-});
+    });
+
+
+    /* ---------------------- BROWSE VIEW  ---------------------- */
+
+    const genderFilterBox = document.querySelector("#filterGender");
+    const categoryFilterBox = document.querySelector("#filterCategory");
+    const sizeFilterBox = document.querySelector("#filterSize");
+    const colorFilterBox = document.querySelector("#filterColor");
+    
+
+    const browseState = {
+        gender: null,        // "womens", "mens", or null
+        category: null,      // "Tops", "Bottoms", ...
+        size: null,          // "XS", "S", ...
+        colors: [],          // array of selected color names: ["Beige", "Blue"]
+        sortBy: "name"       // "name" | "price" | "category"
+      };
+
+
+    /* 
+    renderBrowseResults(products)
+    -----------------------------
+    Clears the results area and creates product cards for each product.
+    Each card shows image, title, price, and includes a data-product-id.
+    */
+    function renderBrowseResults(products) {
+        results.innerHTML = "";
+      
+        if (products.length === 0) {
+          results.textContent = "No products match your filter.";
+          return;
+        }
+      
+        products.forEach(product => {
+          const card = document.createElement("article");
+          card.classList.add("product-card");
+          card.dataset.productId = product.id;
+      
+          // IMAGE
+          const img = document.createElement("img");
+          img.src = getProductImage(product);
+          img.alt = product.name || product.title;
+          img.classList.add("product-image");
+          card.appendChild(img);
+      
+          // TITLE  ← this is what you want
+          const title = document.createElement("h3");
+          title.textContent = product.name || product.title;
+          title.classList.add("product-title");
+          card.appendChild(title);
+      
+          // PRICE
+          const price = document.createElement("p");
+          price.textContent = `$${product.price.toFixed(2)}`;
+          price.classList.add("product-price");
+          card.appendChild(price);
+      
+          // ADD BUTTON
+          const addBtn = document.createElement("button");
+          addBtn.textContent = "+ Add";
+          addBtn.classList.add("card-add");
+          card.appendChild(addBtn);
+      
+          results.appendChild(card);
+        });
+      }
+
+    function applyBrowseFiltersAndSort() {
+        let filtered = allProducts.slice();
+
+        //Gender filter
+        if (browseState.gender) {
+            filtered = filtered.filter(p => p.gender === browseState.gender);
+        }
+
+        //Category filter
+        if (browseState.category) {
+            filtered = filtered.filter(p => p.category === browseState.category);
+        }
+
+        // Size filter
+        if (browseState.size) {
+            let newFiltered = [];
+          
+            for (let i = 0; i < filtered.length; i++) {
+              let product = filtered[i];
+              let hasSize = false;
+          
+              // check if product has a sizes array
+              if (product.sizes) {
+                for (let j = 0; j < product.sizes.length; j++) {
+                  if (product.sizes[j] === browseState.size) {
+                    hasSize = true;
+                    break;
+                  }
+                }
+              }
+          
+              if (hasSize) newFiltered.push(product);
+            }
+          
+            filtered = newFiltered;
+          }
+          
+
+        //Color filter
+        if (browseState.colors.length > 0) {
+            filtered = filtered.filter(p => {
+              if (!p.color) return false; // safety
+              const productColorNames = p.color.map(c => c.name);
+              // product must contain ALL selected colors
+              return browseState.colors.every(
+                cName => productColorNames.includes(cName)
+              );
+            });
+          }
+
+        //Sort
+        if (browseState.sortBy === "name") {
+            filtered.sort((a, b) => {
+              const nameA = a.name || a.title;
+              const nameB = b.name || b.title;
+        
+              if (nameA < nameB) return -1;
+              if (nameA > nameB) return 1;
+              return 0;
+            });
+          } else if (browseState.sortBy === "price") {
+            filtered.sort((a, b) => a.price - b.price);
+          } else if (browseState.sortBy === "category") {
+            filtered.sort((a, b) => {
+              const catA = a.category;
+              const catB = b.category;
+              if (catA < catB) return -1;
+              if (catA > catB) return 1;
+              return 0;
+            });
+          }
+          renderBrowseResults(filtered);
+          renderActiveFilters();
+    }
+
+
+    /*
+    renderActiveFilters()
+    Shows the current filters as little "chips" (e.g., Female, Dresses, Small, Blue).
+    Clicking a chip removes that one filter and re-applies filtering.
+    */
+    function renderActiveFilters() {
+
+        if (!activeFilters) return;
+    
+        activeFilters.innerHTML = "";
+    
+        // Helper to create one chip
+        const addChip = (label, type, value) => {
+        const chip = document.createElement("button");
+        chip.classList.add("filter-chip");
+        chip.textContent = label;
+    
+        chip.addEventListener("click", () => {
+            // Remove that specific filter when the chip is clicked
+            if (type === "gender") {
+            browseState.gender = null;
+            } else if (type === "category") {
+            browseState.category = null;
+            } else if (type === "size") {
+            browseState.size = null;
+            } else if (type === "color") {
+            browseState.colors = browseState.colors.filter(c => c !== value);
+            }
+    
+            applyBrowseFiltersAndSort();
+        });
+    
+        activeFilters.appendChild(chip);
+        };
+    
+        // Gender (convert internal value to label)
+        if (browseState.gender) {
+            const label = browseState.gender === "womens" ? "Female" : "Male";
+            addChip(label, "gender");
+        }
+    
+        // Category chip
+        if (browseState.category) {
+            addChip(browseState.category, "category");
+        }
+    
+        // Size chip
+        if (browseState.size) {
+            addChip(browseState.size, "size");
+        }
+    
+        // Color chips
+        browseState.colors.forEach(colorName => {
+            addChip(colorName, "color", colorName);
+        });
+    }
+
+    /*
+    Clear All Filters button
+    Resets browseState and re-applies filters (which in this case
+    means "no filters" → all products).
+    */
+   if (clearAllFiltersBtn) {
+    clearAllFiltersBtn.addEventListener("click", () => {
+        browseState.gender = null;
+        browseState.category = null;
+        browseState.size = null;
+        browseState.colors = [];
+        browseState.sortBy = "name";
+
+        if (sortSelect) {
+            sortSelect.value = "name";
+        }
+
+        applyBrowseFiltersAndSort();
+    });
+   }
+
+    /*
+    Sort dropdown handler
+
+    When the user changes the sort order (name / price / category),
+    update browseState.sortBy and re-apply filtering.
+    */
+    if (sortSelect) {
+        sortSelect.addEventListener("change", () => {
+        browseState.sortBy = sortSelect.value;
+        applyBrowseFiltersAndSort();
+        });
+    }
+
+    /* 
+    Gender filter
+    Clicking Female/Male sets browseState.gender.
+    Clicking the same again turns it off (toggle).
+    */
+    genderFilterBox.addEventListener("click", (e) => {
+        let btn = e.target;
+        while (btn && !btn.classList.contains("gender-filter")) {
+            btn = btn.parentNode;
+        }
+        if (!btn) return;
+    
+        const value = btn.dataset.gender;
+    
+        // Toggle: if already selected, clear it; otherwise set it
+        if (browseState.gender === value) {
+        browseState.gender = null;
+        } else {
+        browseState.gender = value;
+        }
+    
+        // Update active class on buttons
+        const buttons = genderFilterBox.querySelectorAll(".gender-filter");
+        buttons.forEach(b => {
+            if (b.dataset.gender === browseState.gender) {
+              b.classList.add("active");
+            } else {
+              b.classList.remove("active");
+            }
+          });
+    
+        applyBrowseFiltersAndSort();
+    });
+
+    /*
+    Category filter
+    Only one category active at a time.
+    */
+    categoryFilterBox.addEventListener("click", (e) => {
+        let btn = e.target;
+        while (btn && !btn.classList.contains("category-filter")) {
+            btn = btn.parentNode;
+        }
+        if (!btn) return;
+      
+        const value = btn.dataset.category;
+      
+        if (browseState.category === value) {
+          browseState.category = null;
+        } else {
+          browseState.category = value;
+        }
+      
+        const buttons = categoryFilterBox.querySelectorAll(".category-filter");
+        buttons.forEach(b => {
+            if (b.dataset.category === browseState.category) {
+              b.classList.add("active");
+            } else {
+              b.classList.remove("active");
+            }
+          });
+      
+        applyBrowseFiltersAndSort();
+      });
+
+
+    /*
+    Size filter
+    -----------
+    One size at a time (XS, S, M, L...).
+    */
+    sizeFilterBox.addEventListener("click", (e) => {
+        let btn = e.target;
+        while (btn && (!btn.classList || !btn.classList.contains("size-filter"))) {
+            btn = btn.parentNode;
+        }
+        if (!btn) return;
+
+        const value = btn.dataset.size;
+
+        if (browseState.size === value) {
+            browseState.size = null;
+        } else {
+            browseState.size = value;
+        }
+
+        const buttons = sizeFilterBox.querySelectorAll(".size-filter");
+        buttons.forEach(b => {
+            if (b.dataset.size === browseState.size) {
+                b.classList.add("active");
+            } else {
+                b.classList.remove("active");
+            }
+        });
+
+        applyBrowseFiltersAndSort();
+    });
+
+    /*
+    Color filter
+    ------------
+    Allows multiple colors at once (array of strings).
+    */
+    colorFilterBox.addEventListener("click", (e) => {
+        let btn = e.target;
+        while (btn && (!btn.classList || !btn.classList.contains("color-filter"))) {
+            btn = btn.parentNode;
+        }
+        if (!btn) return;
+
+        const value = btn.dataset.color;
+        const index = browseState.colors.indexOf(value);
+
+        if (index === -1) {
+            // Add color
+            browseState.colors.push(value);
+            btn.classList.add("active");
+        } else {
+            // Remove color
+            browseState.colors.splice(index, 1);
+            btn.classList.remove("active");
+        }
+
+        applyBrowseFiltersAndSort();
+    });
+  
+
+    /* ---------------------- BROWSE VIEW END ---------------------- */
+
+
 
 });

@@ -33,61 +33,104 @@
 
     </article>
 
-    <!-- BROWSE VIEW -->
-    <article id="browseView" class="view" style="display:none;">
-      
-      <!-- Filters Section -->
-      <section id="filters">
-        <h2>Browse Products</h2>
+    <article id="browseView" class="view">
 
-        <div id="filter-gender"></div>
-        <div id="filter-category"></div>
-        <div id="filter-size"></div>
-        <div id="filter-color"></div>
-
-        <div id="active-filters"></div>
-
-        <!-- Sorting -->
+      <h2>Browse Products</h2>
+    
+      <!-- Sort + Clear -->
+      <div id="browseToolbar">
         <label for="sortSelect">Sort by:</label>
         <select id="sortSelect">
           <option value="name">Product Name (A–Z)</option>
           <option value="price">Price</option>
           <option value="category">Category</option>
         </select>
-
-        <button id="clearFiltersBtn">Clear All</button>
-      </section>
-
-      <!-- Results Section -->
-      <section id="results">
-        <!-- Inject product cards here -->
-      </section>
-
+        <button id="clearAllFilters">Clear All</button>
+      </div>
+    
+      <!-- Active filter chips -->
+      <div id="activeFilters"></div>
+    
+      <!-- LEFT SIDEBAR FILTERS -->
+      <aside id="browseFilters">
+    
+        <h3>Gender</h3>
+        <div id="filterGender">
+          <button class="gender-filter" data-gender="womens">Female</button>
+          <button class="gender-filter" data-gender="mens">Male</button>
+        </div>
+    
+        <h3>Category</h3>
+        <div id="filterCategory">
+          <button class="category-filter" data-category="Tops">Tops</button>
+          <button class="category-filter" data-category="Bottoms">Bottoms</button>
+          <button class="category-filter" data-category="Dresses">Dresses</button>
+          <button class="category-filter" data-category="Outerwear">Outerwear</button>
+          <button class="category-filter" data-category="Accessories">Accessories</button>
+          <button class="category-filter" data-category="Loungewear">Loungewear</button>
+          <button class="category-filter" data-category="Intimates">Intimates</button>
+          <button class="category-filter" data-category="Shoes">Shoes</button>
+          <button class="category-filter" data-category="Sweaters">Sweaters</button>
+          <button class="category-filter" data-category="Jumpsuits">Jumpsuits</button>
+        </div>
+    
+        <h3>Size</h3>
+        <div id="filterSize">
+          <button class="size-filter" data-size="XS">XS</button>
+          <button class="size-filter" data-size="S">S</button>
+          <button class="size-filter" data-size="M">M</button>
+          <button class="size-filter" data-size="L">L</button>
+        </div>
+    
+        <h3>Colors</h3>
+        <div id="filterColor">
+          
+        </div>
+    
+      </aside>
+    
+      <!-- PRODUCT GRID -->
+      <section id="results"></section>
+    
     </article>
+    
 
-    <!-- SINGLE PRODUCT VIEW -->
-    <article id="singleProductView" class="view" style="display:none;">
+  <!-- SINGLE PRODUCT VIEW -->
+  <article id="singleProductView" class="view" style="display:none;">
 
-      <nav id="breadcrumbs"></nav>
+    <nav id="breadcrumbs"></nav>
 
-      <section id="productDetails">
-        <div id="productImage"></div>
+    <section id="productDetails">
+      <div id="productImage"></div>
 
-        <h2 id="productTitle"></h2>
-        <p id="productPrice"></p>
-        <p id="productDescription"></p>
-        <p id="productMaterial"></p>
+      <h2 id="productTitle"></h2>
+      <p id="productPrice"></p>
+      <p id="productDescription"></p>
+      <p id="productMaterial"></p>
 
-        <label for="qtyInput">Quantity:</label>
-        <input type="number" id="qtyInput" min="1" value="1">
+      <!-- Size selection -->
+      <p>Size:</p>
+      <div id="sizeOptions">
+        <!-- size buttons  -->
+      </div>
 
-        <button id="addToCartBtn">Add to Cart</button>
+      <p>Colors:</p>
+      <div id="colorOptions" class="color-container"></div>
+      <br>
+        <!-- color swatches will be injected here by JS -->
+      </div>
 
-        <h3>Related Products</h3>
-        <div id="relatedProducts"></div>
-      </section>
+      <!-- Quantity + Add to Cart -->
+      <label for="qtyInput">Quantity:</label>
+      <input type="number" id="qtyInput" min="1" value="1">
 
-    </article>
+      <button id="addToCartBtn">Add to Cart</button>
+
+      <h3>Related Products</h3>
+      <div id="relatedProducts"></div>
+    </section>
+
+  </article>
 
     <!-- SHOPPING CART VIEW -->
     <article id="cartView" class="view" style="display:none;">

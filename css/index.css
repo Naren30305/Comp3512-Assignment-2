@@ -157,4 +157,134 @@ footer {
   background-color: #f9fafb;
 }
 
+/* Grid for the browse results */
+#results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
 
+/* Each product card */
+.product-card {
+  background-color: #111827;      /* dark gray */
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+}
+
+/* Make ALL product images same size */
+.product-image {
+  width: 100%;
+  height: 220px;                  /* pick a height you like */
+  object-fit: cover;              /* crop to fill, no distortion */
+  border-radius: 8px;
+  display: block;
+}
+
+/* Title and price text */
+.product-title {
+  color: #ffffff;  /* or any light color */
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.product-price {
+  margin: 0;
+  font-weight: 600;
+  color: #fbbf24;
+}
+
+/* "+ Add" button inside card */
+.card-add {
+  margin-top: 0.5rem;
+  align-self: flex-start;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+#relatedProducts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Size buttons */
+.size-option {
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #9ca3af;
+  background: transparent;
+  color: #f9fafb;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.size-option.active {
+  background-color: #fbbf24;
+  border-color: #fbbf24;
+  color: #111827;
+}
+
+/* Container for all color items */
+.color-container {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* Each color entry */
+.color-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Color swatch circle */
+.color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  margin-bottom: 0.25rem;
+}
+
+.color-swatch.active {
+  border-color: #fbbf24; /* gold highlight */
+}
+
+/* Color name text */
+.color-label {
+  font-size: 0.75rem;
+  color: #f9fafb;
+}
+
+#browseFilters button {
+  display: inline-block;
+  margin: 0.2rem 0.4rem 0.2rem 0;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid #4b5563;
+  background: transparent;
+  color: #e5e7eb;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+#browseFilters button.active {
+  background-color: #fbbf24;
+  border-color: #fbbf24;
+  color: #111827;
+}
