@@ -443,111 +443,182 @@ footer {
   pointer-events: none;
 }
 
-/* Overall Cart View */
+/* ================== SHOPPING CART VIEW ================== */
+
 #cartView {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  color: #e5e7eb;
+  background: #f3f4f6;          /* light panel like the mockup */
+  color: #111827;
+  padding: 2rem;
+  border-radius: 12px;
 }
 
 #cartView h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 700;
 }
 
-/* Cart items section */
+/* Box that holds the list of cart items */
 #cartItems {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  min-height: 120px;
   margin-bottom: 2rem;
+  color: #111827;
 }
 
-/* Each cart row (if you used .cart-item) */
+/* Text when cart is empty */
+#cartItems:empty::before {
+  content: "Your cart is empty";
+  display: block;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+/* Each cart row */
 .cart-item {
-  background: #111827;
-  padding: 1rem;
-  border-radius: 10px;
-  margin-bottom: 1rem;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-/* Layout for shipping + summary row */
+.cart-item:last-child {
+  border-bottom: none;
+}
+
+.cart-item h3 {
+  flex: 2;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.cart-item p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+/* Qty label + input together */
+.cart-item label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+/* Quantity input */
+.cart-qty {
+  width: 60px;
+  padding: 0.15rem 0.3rem;
+  border-radius: 4px;
+  border: 1px solid #9ca3af;
+}
+
+/* Remove button */
+.cart-remove {
+  border: 1px solid #9ca3af;
+  background: #e5e7eb;
+  color: #111827;
+  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.cart-remove:hover {
+  background: #d1d5db;
+}
+
+/* Layout for Shipping + Summary (two boxes side by side) */
 #checkoutSection {
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 2rem;
   align-items: flex-start;
 }
 
-/* Shipping card */
+/* Shipping box on the left */
 #shippingOptions {
-  flex: 1 1 260px;
-  background: #111827;
-  padding: 1rem 1.25rem;
-  border-radius: 10px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  flex: 1;
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 1rem;
 }
 
-/* Labels + selects inline */
 #shippingOptions label {
   display: block;
   margin-top: 0.5rem;
   margin-bottom: 0.25rem;
   font-size: 0.9rem;
-  color: #d1d5db;
+  color: #374151;
 }
 
-/* Styled dropdowns */
 #shippingOptions select {
   width: 100%;
-  padding: 0.4rem 0.6rem;
-  border-radius: 999px;
-  border: 1px solid #4b5563;
-  background: #1f2937;
-  color: #f9fafb;
+  padding: 0.35rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #9ca3af;
   font-size: 0.9rem;
-  cursor: pointer;
-  outline: none;
-  margin-bottom: 0.5rem;
 }
 
-/* Summary box */
+/* Disabled dropdowns when cart is empty */
+#shippingOptions select:disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Summary box on the right */
 #summaryBox {
-  flex: 1 1 220px;
-  background: #111827;
-  padding: 1rem 1.25rem;
-  border-radius: 10px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  flex: 1;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  color: #111827;
 }
 
 #summaryBox p {
-  margin: 0.3rem 0;
-  font-size: 0.95rem;
+  margin: 0.25rem 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
 }
 
-#summaryBox strong {
-  font-size: 1.05rem;
+/* Total row a bit bolder */
+#summaryBox p:last-of-type {
+  margin-top: 0.5rem;
+  font-weight: 700;
 }
 
 /* Checkout button */
 #checkoutBtn {
-  margin-top: 0.8rem;
+  margin-top: 1rem;
   width: 100%;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 0;
+  border-radius: 8px;
   border: none;
-  border-radius: 999px;
-  background: #fbbf24;
-  color: #111827;
-  font-weight: 700;
-  font-size: 1rem;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.95rem;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease,
-              box-shadow 0.15s ease;
 }
 
-#checkoutBtn:hover {
-  background: #d9a11f;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+#checkoutBtn:hover:enabled {
+  background: #000000;
+}
+
+/* Disabled checkout when cart empty */
+#checkoutBtn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
 }
 
 /* Mobile tweak: stack nicely */
@@ -607,4 +678,57 @@ footer a:hover {
 .filter-chip:active {
   transform: scale(0.95);
   background-color: #444;
+}
+
+/* Quantity input box */
+#qtyInput {
+  width: 80px;
+  padding: 0.45rem 0.6rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fafafa;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#qtyInput:focus {
+  border-color: #0077cc;
+  box-shadow: 0 0 0 2px rgba(0, 119, 204, 0.2);
+  outline: none;
+}
+
+/* Add to Cart Button */
+#addToCartBtn {
+  padding: 0.65rem 1.4rem;
+  margin-top: .5rem;
+  background: linear-gradient(135deg, #ff7a2c, #ff541a);
+  border: none;
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.1s ease, box-shadow 0.15s ease, filter 0.2s ease;
+}
+
+#addToCartBtn:hover {
+  filter: brightness(1.07);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  transform: translateY(-1px);
+}
+
+#addToCartBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Cart image */
+.cart-item-image {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;   /* crop instead of stretching */
+  border-radius: 6px;
+  flex-shrink: 0;      /* stops image from shrinking oddly */
 }

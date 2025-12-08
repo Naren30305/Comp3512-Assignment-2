@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentProductId = null;
 
 
+
+
     function loadProducts() {
         // FIRST: Try to load the product data from localStorage.
         let stored = localStorage.getItem("products");
@@ -326,19 +328,37 @@ function renderRelatedProducts(product) {
     });
 }
 
+/*
+  Click event handling for Related Products
+  ----------------------------------------
+  - This listener controls TWO different behaviors:
+      1) If the user clicks the "+ Add" button:
+           → Add that related product to the cart.
+      2) If the user clicks anywhere else on the card:
+           → Open that product in the Single Product View.
+*/
 relatedProducts.addEventListener("click", (e) => {
-    let card = e.target;
-  
-    // walk up the tree until we find .related-card
-    while (card && !card.classList?.contains("related-card")) {
-      card = card.parentNode;
+    let node = e.target;
+
+    // Walk upward until we find .related-card or reach the container
+    while (node && node !== relatedProducts && !node.classList.contains("related-card")) {
+        node = node.parentElement;
     }
-  
-    if (!card) return;
-  
-    const productId = card.dataset.productId;
-    showProduct(productId);
-  });
+
+    // If nothing was found, ignore the click
+    if (!node || !node.classList.contains("related-card")) return;
+
+
+    // If the + Add button was clicked
+    if (e.target.classList.contains("card-add")) {
+        addToCart(node.dataset.productId, 1);
+        return; 
+    }
+
+    // Otherwise open the product
+    showProduct(node.dataset.productId);
+});
+
 
 
 /*
@@ -388,20 +408,21 @@ function findProductCard(element) {
 */
 function addToCart(productId, qty) {
 
-    const idNum = Number(productId);
-
+    const idStr = String(productId);
+    
     // Try to find existing item
-    const existing = cart.find(item => item.id === idNum);
-
+    const existing = cart.find(item => item.id === idStr);
+    
     if (existing) {
         existing.quantity += qty; // increment existing quantity
     } else {
-        cart.push({ id: idNum, quantity: qty }); // add new entry
+        cart.push({ id: idStr, quantity: qty }); // add new entry
     }
-
+    
+    updateCartBadge();
     alert("Added to cart!");
-    renderCartView();   
-}
+    renderCartView();
+    }
 
 
 /*
@@ -438,8 +459,18 @@ function showView(viewId) {
     const sumShip = document.querySelector("#sumShip");
     const sumTotal = document.querySelector("#sumTotal");
     const checkoutBtn = document.querySelector("#checkoutBtn");
-    
 
+
+    // --- Cart count helpers for the header badge ---
+    function getCartItemCount() {
+        return cart.reduce((sum, item) => sum + item.quantity, 0);
+    }
+
+    function updateCartBadge() {
+        const badge = document.querySelector("#cartCount");
+        if (!badge) return;          // safety check
+        badge.textContent = getCartItemCount();
+    }
 
     /* 
     renderCartView()
@@ -451,41 +482,71 @@ function showView(viewId) {
     */
     function renderCartView() {
         cartItems.innerHTML = "";
-
-        //If nothing in cart, show message and zero totals 
+    
+        // If nothing in cart, show message and zero totals 
         if (cart.length === 0) {
             cartItems.textContent = "Your cart is empty";
             updateCartSummary();
             return;
         }
-
+    
         cart.forEach(item => {
-            // Find matching product so we can show name & price
+
+            
+            // Find matching product so we can show info
             const product = allProducts.find(p => p.id === item.id);
             if (!product) return;
-
+    
             const price = product.price;
             const subTotal = price * item.quantity;
-
+    
+            // --- pick a default color & size to display ---
+            let colorName = "N/A";
+            if (product.color && product.color.length > 0) {
+                colorName = product.color[0].name;      // first color
+            }
+    
+            let sizeName = "N/A";
+            if (product.sizes && product.sizes.length > 0) {
+                sizeName = product.sizes[0];            // first size
+            }
+    
             // Create the row container
             const row = document.createElement("div");
             row.classList.add("cart-item");
             row.dataset.productId = item.id;
-            
-            //Title
+
+
+            const img = document.createElement("img");
+            img.classList.add("cart-item-image");
+            img.src = getProductImage(product);  // 👈 YOUR FUNCTION HERE
+            img.alt = product.name;
+            row.appendChild(img);
+    
+            // Title
             const title = document.createElement("h3");
             title.textContent = product.name;
             row.appendChild(title);
-
-            //Price info
+    
+            // Color (NEW)
+            const color = document.createElement("p");
+            color.textContent = `Color: ${colorName}`;
+            row.appendChild(color);
+    
+            // Size (NEW)
+            const size = document.createElement("p");
+            size.textContent = `Size: ${sizeName}`;
+            row.appendChild(size);
+    
+            // Price info (now comes after color/size)
             const info = document.createElement("p");
             info.textContent = `Price: $${price.toFixed(2)}`;
             row.appendChild(info);
-
-            //Quantity control
+    
+            // Quantity control
             const qtyLabel = document.createElement("label");
             qtyLabel.textContent = "Qty: ";
-
+    
             const qtyInputCart = document.createElement("input");
             qtyInputCart.type = "number";
             qtyInputCart.min = "1";
@@ -493,21 +554,21 @@ function showView(viewId) {
             qtyInputCart.classList.add("cart-qty");
             qtyLabel.appendChild(qtyInputCart);
             row.appendChild(qtyLabel);
-
-            //Subtotal
+    
+            // Subtotal
             const sub = document.createElement("p");
             sub.textContent = `Subtotal: $${subTotal.toFixed(2)}`;
             row.appendChild(sub);
-
-            //Remove button 
+    
+            // Remove button 
             const removeBtn = document.createElement("button");
             removeBtn.textContent = "Remove";
             removeBtn.classList.add("cart-remove");
             row.appendChild(removeBtn);
-            
+    
             cartItems.appendChild(row);
         });
-
+    
         updateCartSummary();
     }
     /*
@@ -619,8 +680,9 @@ function showView(viewId) {
     Deletes the item from the cart array.
     */
     function removeFromCart(productId) {
-        const idNum = Number(productId);
-        cart = cart.filter(item => item.id !== idNum);
+        const idStr = String(productId);
+        cart = cart.filter(item => item.id !== idStr);
+        updateCartBadge();
         renderCartView();
     }
 
@@ -631,11 +693,12 @@ function showView(viewId) {
     function updateCartQuantity(productId, newQty) {
         if (!newQty || newQty < 1 ) newQty = 1;
 
-        const idNum = Number(productId);
-        const item = cart.find(i => i.id === idNum);
+        const idStr = String(productId);
+        const item = cart.find(i => i.id === idStr);
         if(!item) return;
 
         item.quantity = newQty;
+        updateCartBadge();
         renderCartView();
     }
 
@@ -661,6 +724,7 @@ function showView(viewId) {
 
         // Clear cart and re-render
         cart = [];
+        updateCartBadge();
         renderCartView();
     /* ---------------------- SHOPPING CART VIEW END ---------------------- */
 
@@ -1234,6 +1298,7 @@ function showView(viewId) {
     // Default starting view when the page first loads
     loadProducts();  
     showView("homeView");
+    updateCartBadge();
 
     /* ---------------------- NAVIGATION BUTTONS END ---------------------- */
 
