@@ -998,29 +998,49 @@ function showView(viewId) {
     unique color name (Wine, Light Gray, Red, etc.).
     */
     function generateColorFilters() {
-        const colorSet = new Set();
-
+        let colors = [];
+    
         // Collect all color names from product data
-        allProducts.forEach(p => {
+        for (let i = 0; i < allProducts.length; i++) {
+            let p = allProducts[i];
+    
             if (p.color) {
-                p.color.forEach(c => colorSet.add(c.name));
+                for (let j = 0; j < p.color.length; j++) {
+                    let colorName = p.color[j].name;
+    
+                    // Add only if not already in colors[]
+                    let exists = false;
+    
+                    for (let k = 0; k < colors.length; k++) {
+                        if (colors[k] === colorName) {
+                            exists = true;
+                            break;
+                        }
+                    }
+    
+                    if (!exists) {
+                        colors.push(colorName);
+                    }
+                }
             }
-        });
-
-        const allColors = Array.from(colorSet).sort();
-
-        // Clear any existing buttons
+        }
+    
+        // Sort alphabetically
+        colors.sort();
+    
+        // Clear old buttons
         colorFilterBox.innerHTML = "";
-
-        // Create a button for each color
-        allColors.forEach(colorName => {
+    
+        // Build buttons
+        for (let i = 0; i < colors.length; i++) {
             const btn = document.createElement("button");
             btn.classList.add("color-filter");
-            btn.dataset.color = colorName;
-            btn.textContent = colorName;
+            btn.dataset.color = colors[i];
+            btn.textContent = colors[i];
             colorFilterBox.appendChild(btn);
-        });
+        }
     }
+    
 
     /*
     generateCategoryFilters()
