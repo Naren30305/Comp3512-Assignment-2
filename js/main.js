@@ -9,7 +9,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-
+    /*
+    loadProducts()
+    Function will first try to get data from the localStorage, if unable to fetch it from the web URL
+    */
     function loadProducts() {
         // FIRST: Try to load the product data from localStorage.
         let stored = localStorage.getItem("products");
