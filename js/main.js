@@ -882,6 +882,8 @@ function showView(viewId) {
             sortSelect.value = "name";
         }
 
+        resetAllFilterButtons();
+
         applyBrowseFiltersAndSort();
     });
    }
@@ -1126,7 +1128,6 @@ function showView(viewId) {
     /*
     generateSizeFilters()
     Builds size buttons (XS, S, M, L, XL, etc.)
-
     */
     function generateSizeFilters() {
 
@@ -1172,8 +1173,32 @@ function showView(viewId) {
         }
     }
 
+    /*
+    resetAllFilterButtons()
+    When a user clicks on an active filter and then clicks the "clear all" button it'll remove the active filter.
+    */
+    function resetAllFilterButtons() {
+        // Gender
+        document.querySelectorAll(".gender-filter").forEach(btn => {
+            btn.classList.remove("active");
+        });
     
-
+        // Category
+        document.querySelectorAll(".category-filter").forEach(btn => {
+            btn.classList.remove("active");
+        });
+    
+        // Size
+        document.querySelectorAll(".size-filter").forEach(btn => {
+            btn.classList.remove("active");
+        });
+    
+        // Color
+        document.querySelectorAll(".color-filter").forEach(btn => {
+            btn.classList.remove("active");
+        });
+    }
+    
 
   
 

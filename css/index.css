@@ -575,3 +575,36 @@ footer a {
 footer a:hover {
   text-decoration: underline;
 }
+
+/* Container that holds all active filter chips */
+#activeFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  padding: 0.5rem 0;
+}
+
+/* Individual filter chip */
+.filter-chip {
+  background-color: #222;      /* dark pill background */
+  color: #fbbf24;              /* gold text (matches your theme) */
+  border: 1px solid #444;      /* subtle border */
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;        /* makes pills perfectly rounded */
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Hover effect: brighten + lift */
+.filter-chip:hover {
+  background-color: #333;
+  transform: translateY(-2px);
+}
+
+/* Clicking (remove filter) effect */
+.filter-chip:active {
+  transform: scale(0.95);
+  background-color: #444;
+}
