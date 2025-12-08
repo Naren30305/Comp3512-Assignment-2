@@ -286,7 +286,8 @@ function renderRelatedProducts(product) {
     // Get other products in the same category (exclude current one)
     const related = allProducts
         .filter(p => p.category === product.category && p.id !== product.id)
-        .slice(0, 4); // limit to 4 items
+        // limit to 4 items
+        .slice(0, 4); //cited from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
 
     // If no related items, just leave blank (or show message if you want)
     if (related.length === 0) {
@@ -829,7 +830,7 @@ function showView(viewId) {
       }
 
     function applyBrowseFiltersAndSort() {
-        let filtered = allProducts.slice();
+        let filtered = allProducts.slice(); //Cited from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/slice
 
         //Gender filter
         if (browseState.gender) {
