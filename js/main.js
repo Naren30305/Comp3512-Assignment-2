@@ -7,28 +7,58 @@ document.addEventListener("DOMContentLoaded", () => {
     let cart = [];
     let currentProductId = null;
 
-    // Load products from JSON once the DOM is ready
-    fetch(url)
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            } else 
-            throw new Error("Fetch failed");
-        })
-        .then(data => {
-            allProducts = data;
 
+    function loadProducts() {
+        // FIRST: Try to load the product data from localStorage.
+        let stored = localStorage.getItem("products");
+    
+        // If localStorage already has product data saved
+        if (stored) {
+    
+            // Convert JSON string → JavaScript array
+            allProducts = JSON.parse(stored);
+    
+            // Build all filters and show the browse results
             generateCategoryFilters();
             generateSizeFilters();
             generateColorFilters();
-            applyBrowseFiltersAndSort();    
+            applyBrowseFiltersAndSort();
+    
+            // Stop here — no need to fetch from API
+            return;
+        }
+    
 
-
-        })
-        .catch(err => {
-            console.error("Error loading products:", err); 
-        });
-
+        // Otherwise: fetch the product data from the API
+        fetch(url)
+            .then(response => {
+                if (response.ok) {
+                    return response.json();  // convert response → JS data
+                }
+                throw new Error("Fetch failed");
+            })
+            .then(data => {
+    
+                // Save fetched data into our global array
+                allProducts = data;
+    
+                // Save the data in localStorage for future visits
+                // Convert array → JSON string before saving
+                localStorage.setItem("products", JSON.stringify(allProducts));
+    
+                console.log("Fetched from server and saved to localStorage");
+    
+                // Now generate filters and show results
+                generateCategoryFilters();
+                generateSizeFilters();
+                generateColorFilters();
+                applyBrowseFiltersAndSort();
+            })
+            .catch(err => {
+                console.error("Error loading products:", err);
+            });
+    }
+    
     
 
     /* ---------------------- SINGLE PRODUCT VIEW ---------------------- */
@@ -43,7 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const addToCartBtn = document.querySelector("#addToCartBtn");
     const relatedProducts = document.querySelector("#relatedProducts");
     const results = document.querySelector("#results");
-    const activeFilters = document.querySelector("#active-filters");
+    const activeFilters = document.querySelector("#activeFilters");
     const clearAllFiltersBtn = document.querySelector("#clearAllFilters");
     const sortSelect = document.querySelector("#sortSelect");
     const sizeOptions = document.querySelector("#sizeOptions");
@@ -408,6 +438,7 @@ function showView(viewId) {
     const sumShip = document.querySelector("#sumShip");
     const sumTotal = document.querySelector("#sumTotal");
     const checkoutBtn = document.querySelector("#checkoutBtn");
+    
 
 
     /* 
@@ -1151,6 +1182,7 @@ function showView(viewId) {
 
     /* ---------------------- NAVIGATION BUTTONS ---------------------- */
     // Handle nav buttons (Home, Browse, Cart)
+    
     document.querySelectorAll("nav [data-view]").forEach(btn => {
     btn.addEventListener("click", () => {
         const viewId = btn.dataset.view;   // e.g. "homeView", "browseView", "cartView"
@@ -1175,6 +1207,7 @@ function showView(viewId) {
 
 
     // Default starting view when the page first loads
+    loadProducts();  
     showView("homeView");
 
     /* ---------------------- NAVIGATION BUTTONS END ---------------------- */

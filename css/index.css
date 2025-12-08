@@ -556,3 +556,22 @@ footer {
     flex-direction: column;
   }
 }
+
+footer {
+  background: #111;
+  color: #ccc;
+  text-align: center;
+  padding: 1rem;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+}
+
+footer a {
+  color: #fbbf24;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
