@@ -13,9 +13,9 @@
   <header>
     <h1>Clothing Store</h1>
     <nav>
-      <button data-view="home">Home</button>
-      <button data-view="browse">Browse</button>
-      <button data-view="cart">Cart</button>
+      <button data-view="homeView">Home</button>
+      <button data-view="browseView">Browse</button>
+      <button data-view="cartView">Cart</button>
       <button id="aboutBtn">About Us</button>
     </nav>
   </header>
@@ -62,24 +62,10 @@
     
         <h3>Category</h3>
         <div id="filterCategory">
-          <button class="category-filter" data-category="Tops">Tops</button>
-          <button class="category-filter" data-category="Bottoms">Bottoms</button>
-          <button class="category-filter" data-category="Dresses">Dresses</button>
-          <button class="category-filter" data-category="Outerwear">Outerwear</button>
-          <button class="category-filter" data-category="Accessories">Accessories</button>
-          <button class="category-filter" data-category="Loungewear">Loungewear</button>
-          <button class="category-filter" data-category="Intimates">Intimates</button>
-          <button class="category-filter" data-category="Shoes">Shoes</button>
-          <button class="category-filter" data-category="Sweaters">Sweaters</button>
-          <button class="category-filter" data-category="Jumpsuits">Jumpsuits</button>
         </div>
     
         <h3>Size</h3>
         <div id="filterSize">
-          <button class="size-filter" data-size="XS">XS</button>
-          <button class="size-filter" data-size="S">S</button>
-          <button class="size-filter" data-size="M">M</button>
-          <button class="size-filter" data-size="L">L</button>
         </div>
     
         <h3>Colors</h3>
@@ -176,15 +162,17 @@
   </main>
 
   <!-- ABOUT US DIALOG -->
-  <dialog id="aboutDialog">
-    <h2>About This App</h2>
-    <p>COMP 3512 Assignment 2 — Single Page Application</p>
-    <p>Built using plain JavaScript, HTML, and CSS.</p>
-    <p>Kenny Tran, Naren</p>
-    <a href="https://github.com/Naren30305/Comp3512-Assignment-2" >GitHub</a><br><br>
-
-    <button id="closeAbout">Close</button>
-  </dialog>
+  <div id="aboutOverlay">
+    <div id="aboutModal">
+      <h2>About This App</h2>
+      <p>COMP 3512 Assignment 2 — Single Page Application</p>
+      <p>Built using plain JavaScript, HTML, and CSS.</p>
+      <p>Kenny Tran, Naren</p>
+      <a href="https://github.com/Naren30305/Comp3512-Assignment-2">GitHub</a><br><br>
+  
+      <button id="closeAbout">Close</button>
+    </div>
+  </div>
 
   <!-- JAVASCRIPT -->
   <script src="js/main.js"></script>

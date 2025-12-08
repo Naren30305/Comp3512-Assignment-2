@@ -18,8 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
             allProducts = data;
 
+            generateCategoryFilters();
+            generateSizeFilters();
+            generateColorFilters();
             applyBrowseFiltersAndSort();    
-            showView("browseView");
+
 
         })
         .catch(err => {
@@ -292,6 +295,20 @@ function renderRelatedProducts(product) {
         relatedProducts.appendChild(card);
     });
 }
+
+relatedProducts.addEventListener("click", (e) => {
+    let card = e.target;
+  
+    // walk up the tree until we find .related-card
+    while (card && !card.classList?.contains("related-card")) {
+      card = card.parentNode;
+    }
+  
+    if (!card) return;
+  
+    const productId = card.dataset.productId;
+    showProduct(productId);
+  });
 
 
 /*
@@ -919,7 +936,6 @@ function showView(viewId) {
 
     /*
     Size filter
-    -----------
     One size at a time (XS, S, M, L...).
     */
     sizeFilterBox.addEventListener("click", (e) => {
@@ -951,7 +967,6 @@ function showView(viewId) {
 
     /*
     Color filter
-    ------------
     Allows multiple colors at once (array of strings).
     */
     colorFilterBox.addEventListener("click", (e) => {
@@ -960,26 +975,188 @@ function showView(viewId) {
             btn = btn.parentNode;
         }
         if (!btn) return;
-
+    
         const value = btn.dataset.color;
         const index = browseState.colors.indexOf(value);
-
+    
         if (index === -1) {
-            // Add color
             browseState.colors.push(value);
             btn.classList.add("active");
         } else {
-            // Remove color
             browseState.colors.splice(index, 1);
             btn.classList.remove("active");
         }
-
+    
         applyBrowseFiltersAndSort();
     });
+    
+
+
+    /*
+    generateColorFilters()
+    Looks at allProducts and builds one color button for each
+    unique color name (Wine, Light Gray, Red, etc.).
+    */
+    function generateColorFilters() {
+        const colorSet = new Set();
+
+        // Collect all color names from product data
+        allProducts.forEach(p => {
+            if (p.color) {
+                p.color.forEach(c => colorSet.add(c.name));
+            }
+        });
+
+        const allColors = Array.from(colorSet).sort();
+
+        // Clear any existing buttons
+        colorFilterBox.innerHTML = "";
+
+        // Create a button for each color
+        allColors.forEach(colorName => {
+            const btn = document.createElement("button");
+            btn.classList.add("color-filter");
+            btn.dataset.color = colorName;
+            btn.textContent = colorName;
+            colorFilterBox.appendChild(btn);
+        });
+    }
+
+    /*
+    generateCategoryFilters()
+    Builds one button per unique category found in allProducts.
+    Example: Tops, Bottoms, Dresses, Outerwear, Loungewear, Shoes, etc.
+    */
+    function generateCategoryFilters() {
+
+        let categories = []; 
+    
+        // Collect category names from all products (no duplicates)
+        for (let i = 0; i < allProducts.length; i++) {
+            const p = allProducts[i];
+            const cat = p.category;
+    
+            if (cat) {
+                // manually check if cat is already in the array
+                let exists = false;
+                for (let j = 0; j < categories.length; j++) {
+                    if (categories[j] === cat) {
+                        exists = true;
+                        break;
+                    }
+                }
+    
+                if (!exists) {
+                    categories.push(cat);
+                }
+            }
+        }
+    
+        // Sort alphabetically
+        categories.sort();
+    
+        // Clear any existing buttons
+        categoryFilterBox.innerHTML = "";
+    
+        // Build buttons
+        for (let k = 0; k < categories.length; k++) {
+            const catName = categories[k];
+    
+            const btn = document.createElement("button");
+            btn.classList.add("category-filter");
+            btn.dataset.category = catName;
+            btn.textContent = catName;
+    
+            categoryFilterBox.appendChild(btn);
+        }
+    }
+    
+
+    /*
+    generateSizeFilters()
+    Builds size buttons (XS, S, M, L, XL, etc.)
+
+    */
+    function generateSizeFilters() {
+
+        let sizes = [];  
+
+        // Collect all sizes from products (no duplicates)
+        for (let i = 0; i < allProducts.length; i++) {
+            const product = allProducts[i];
+
+            if (product.sizes) {
+                for (let j = 0; j < product.sizes.length; j++) {
+                    const size = product.sizes[j];
+
+                    // check if size already exists in sizes[]
+                    let exists = false;
+                    for (let k = 0; k < sizes.length; k++) {
+                        if (sizes[k] === size) {
+                            exists = true;
+                            break;
+                        }
+                    }
+
+                    if (!exists) {
+                        sizes.push(size);
+                    }
+                }
+            }
+        }
+
+        // Clear existing buttons
+        sizeFilterBox.innerHTML = "";
+
+        // Build buttons
+        for (let i = 0; i < sizes.length; i++) {
+            const sizeName = sizes[i];
+
+            const btn = document.createElement("button");
+            btn.classList.add("size-filter");
+            btn.dataset.size = sizeName;
+            btn.textContent = sizeName;
+
+            sizeFilterBox.appendChild(btn);
+        }
+    }
+
+    
+
+
   
 
     /* ---------------------- BROWSE VIEW END ---------------------- */
 
 
+    /* ---------------------- NAVIGATION BUTTONS ---------------------- */
+    // Handle nav buttons (Home, Browse, Cart)
+    document.querySelectorAll("nav [data-view]").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const viewId = btn.dataset.view;   // e.g. "homeView", "browseView", "cartView"
+        showView(viewId);
+    });
+    });
+
+    // About modal elements
+    const aboutBtn = document.querySelector("#aboutBtn");
+    const aboutOverlay = document.querySelector("#aboutOverlay");
+    const closeAboutBtn = document.querySelector("#closeAbout");
+
+    // Open modal using display = "flex"
+    aboutBtn.addEventListener("click", () => {
+    aboutOverlay.style.display = "flex";
+    });
+
+    // Close modal using display = "none"
+    closeAboutBtn.addEventListener("click", () => {
+    aboutOverlay.style.display = "none";
+    });
+
+
+    // Default starting view when the page first loads
+    showView("homeView");
+
+    /* ---------------------- NAVIGATION BUTTONS END ---------------------- */
 
 });
