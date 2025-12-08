@@ -399,30 +399,41 @@ function findProductCard(element) {
 
 
 /*
-  addToCart(productId, qty)
-  -------------------------
-  Adds a product to the shopping cart.
-  - If the item already exists in the cart, increase its quantity.
-  - Otherwise, create a new entry.
-  - Shows a temporary alert (will be replaced with a toast later).
+  addToCart(productId, qty, size, color)
+  --------------------------------------
+  - Adds a product to the cart.
+  - Also stores the selected size and color (if provided).
+  - If the same product with the same size and color is already
+    in the cart, just increase its quantity.
 */
-function addToCart(productId, qty) {
-
+function addToCart(productId, qty, size, color) {
     const idStr = String(productId);
-    
-    // Try to find existing item
-    const existing = cart.find(item => item.id === idStr);
-    
+
+    // Find an existing cart entry with same product + size + color
+    const existing = cart.find(item =>
+        item.id === idStr &&
+        item.size === size &&
+        item.color === color
+    );
+
     if (existing) {
-        existing.quantity += qty; // increment existing quantity
+        // If found, just increase the quantity
+        existing.quantity += qty;
     } else {
-        cart.push({ id: idStr, quantity: qty }); // add new entry
+        // Otherwise create a new cart line
+        cart.push({
+            id: idStr,
+            quantity: qty,
+            size: size || null,
+            color: color || null
+        });
     }
-    
+
     updateCartBadge();
     alert("Added to cart!");
     renderCartView();
-    }
+}
+
 
 
 /*
@@ -431,9 +442,26 @@ function addToCart(productId, qty) {
   - Call addToCart() with the currentProductId
 */
 addToCartBtn.addEventListener("click", () => {
-    const qty = parseInt(qtyInput.value);
-    addToCart(currentProductId, qty);
+    const qty = parseInt(qtyInput.value) || 1;
+
+    // Find selected size button (has .active)
+    const selectedSizeBtn = document.querySelector("#sizeOptions .size-option.active");
+    const selectedSize = selectedSizeBtn ? selectedSizeBtn.textContent : null;
+
+    // Find selected color button/swatch (has .active)
+    const selectedColorBtn = document.querySelector("#colorOptions .color-swatch.active");
+    let selectedColor = null;
+    if (selectedColorBtn) {
+        if (selectedColorBtn.dataset.color) {
+            selectedColor = selectedColorBtn.dataset.color;
+        } else if (selectedColorBtn.dataset.colorName) {
+            selectedColor = selectedColorBtn.dataset.colorName;
+        }
+    }
+
+    addToCart(currentProductId, qty, selectedSize, selectedColor);
 });
+
 
 
 /*
@@ -502,13 +530,17 @@ function showView(viewId) {
     
             // --- pick a default color & size to display ---
             let colorName = "N/A";
-            if (product.color && product.color.length > 0) {
-                colorName = product.color[0].name;      // first color
+            if (item.color) {
+                colorName = item.color;
+            } else if (product.color && product.color.length > 0) {
+                colorName = product.color[0].name;
             }
-    
+            
             let sizeName = "N/A";
-            if (product.sizes && product.sizes.length > 0) {
-                sizeName = product.sizes[0];            // first size
+            if (item.size) {
+                sizeName = item.size;
+            } else if (product.sizes && product.sizes.length > 0) {
+                sizeName = product.sizes[0];
             }
     
             // Create the row container
